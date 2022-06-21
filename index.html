@@ -1,1 +1,36 @@
-Changing resources ipsem
+# Databricks notebook source
+from ifood_databricks import datalake, etl
+from ifood_databricks.gcp import gsheet
+from ifood_databricks.data_products.reader import read
+from pyspark.sql.functions import col, concat, lit
+from pyspark.sql.functions import *
+from datetime import datetime
+from datetime import date
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+
+# COMMAND ----------
+
+# MAGIC %run Shared/identity/identity_utils
+
+# COMMAND ----------
+
+midpoint = spark.sql("""
+select * from pii_data_raw.ifood_midpoint_ifood_midpoint_m_focus mfocus join pii_data_raw.ifood_midpoint_ifood_midpoint_m_user muser on muser.oid = mfocus.oid""")
+tote = spark.sql(""" 
+select * from pii_data_raw.ifood_tote_ifood_tote_m_focus mfocus join pii_data_raw.ifood_tote_ifood_tote_m_user muser on muser.oid = mfocus.oid""")
+midpoint.registerTempTable('midpoint')
+tote.registerTempTable('tote')
+midpointTote = spark.sql(""" select * from midpoint left join tote using(oid) """)
+midpointTote = midpointTote.dropDuplicates(['emailaddress'])
+display(midpointTote)
+
+# COMMAND ----------
+
+logs = farewell35_logs()
+display(logs)
+
+# COMMAND ----------
+
+
